@@ -8,7 +8,8 @@
     "compile": "hardhat compile",
     "deploy": "hardhat deploy",
     "deploy-testnet": "hardhat --network mumbai deploy",
-    "mint-testnet": "hardhat --network mumbai mint"
+    "mint-testnet": "hardhat --network mumbai mint",
+    "upload-metadata": "&& ./lib/ipfs-upload-client"
   },
   "author": "",
   "license": "ISC",
