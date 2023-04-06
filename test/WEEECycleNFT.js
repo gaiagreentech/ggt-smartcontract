@@ -114,4 +114,68 @@ describe("WEEECycleNFT", function () {
 
     })
   })
+
+  describe("Auto-Burn", function() {
+    it("Should only burn tokens when their time has come", async function () {
+      const [owner] = await ethers.getSigners();
+
+      const add2 = ethers.Wallet.createRandom().connect(this.provider);
+
+      const getBalance = async (address) => (await this.deploy.balanceOf(address))["_hex"];
+
+      const block1 = await ethers.provider.getBlock('latest');
+
+      const tx1 = await this.deploy.connect(owner).safeMint(add2.address, {"file": "fileurl"});
+      await tx1.wait();
+
+      const block2 = await ethers.provider.getBlock('latest');
+
+      const tx2 = await this.deploy.connect(owner).safeMint(add2.address, {"file": "fileurl"});
+      await tx2.wait();
+
+      const block3 = await ethers.provider.getBlock('latest');
+
+      const tx3 = await this.deploy.connect(owner).safeMint(add2.address, {"file": "fileurl"});
+      await tx3.wait();
+
+      const block4 = await ethers.provider.getBlock('latest');
+
+      const tx4 = await this.deploy.connect(owner).safeMint(add2.address, {"file": "fileurl"});
+      await tx4.wait();
+
+      expect(await getBalance(add2.address)).to.equal('0x04');
+
+      // Wait for the first token to expire
+      await mine(block2.timestamp - block1.timestamp + 1, { interval: 3001 });
+      await this.deploy.checkUpkeep(00);
+      const tx1b = await this.deploy.publicBurn(1);
+      await tx1b.wait();
+
+      expect(await getBalance(add2.address)).to.equal('0x03');
+
+      // Wait for the second token to expire
+      await mine(block3.timestamp - block2.timestamp + 1, { interval: 3001 });
+      await this.deploy.checkUpkeep(00);
+      const tx2b = await this.deploy.publicBurn(2);
+      await tx2b.wait();
+
+      expect(await getBalance(add2.address)).to.equal('0x02');
+
+      // Wait for the third token to expire
+      await mine(block4.timestamp - block3.timestamp + 1, { interval: 3001 });
+      await this.deploy.checkUpkeep(00);
+      const tx3b = await this.deploy.publicBurn(3);
+      await tx3b.wait();
+
+      expect(await getBalance(add2.address)).to.equal('0x01');
+
+      // Wait for the fourth token to expire
+      await mine(3001);
+      await this.deploy.checkUpkeep(00);
+      const tx4b = await this.deploy.publicBurn(4);
+      await tx4b.wait();
+
+      expect(await getBalance(add2.address)).to.equal('0x00');
+    });
+  });
 })
