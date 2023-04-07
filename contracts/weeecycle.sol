@@ -22,28 +22,36 @@ contract WEEECycleNFT is KeeperCompatibleInterface, ERC721, ERC721URIStorage, Ow
     // Check if any token needs upkeep
     function checkUpkeep(bytes calldata /* checkData */) external view returns (bool upkeepNeeded, bytes memory performData) {
         upkeepNeeded = false;
-
-        // Iterate over all existing tokens and check their creation timestamps
+        // Create an array of tokens to burn, that has the max size of 10
+        uint256[] memory tokensToBurn = new uint256[](10);
+        uint256 tokensToBurnCount = 0;
         for (uint256 i = 1; i <= _tokenIdCounter.current(); i++) {
             uint256 creationTimestamp = _tokenCreationTimestamps[i];
-
-            //skip tokens that have already been burned
             if (creationTimestamp == 0) {
                 continue;
             }
-            if ((block.timestamp - creationTimestamp) > interval) {
-                // If a token's lifespan has expired, set upkeepNeeded to true and encode the token ID and time elapsed since creation
+            if ((block.timestamp - creationTimestamp) >= interval) {
                 upkeepNeeded = true;
-                performData = abi.encode(i);
-                break;
+                tokensToBurn[tokensToBurnCount] = i;
+                tokensToBurnCount++;
             }
+        }
+        if (upkeepNeeded) {
+            performData = abi.encode(tokensToBurn);
         }
     }
 
     // Perform upkeep for a specific token
     function performUpkeep(bytes calldata performData) external override {
-        uint256 tokenId = abi.decode(performData, (uint256));
-        _burn(tokenId);
+        uint256[] memory tokensToBurn = abi.decode(performData, (uint256[]));
+        for (uint256 i = 0; i < tokensToBurn.length; i++) {
+            // Since the tokens array is fixed length, we need to check if the token ID is 0, because it fills the elements
+            if(tokensToBurn[i] != 0){
+                _burn(tokensToBurn[i]);
+            }
+
+        }
+        
     }
 
     // Mint a new token and set its creation timestamp
