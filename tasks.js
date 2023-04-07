@@ -52,7 +52,7 @@ task("generate-metadata", "Generate metadata file and upload files to IPFS")
     for (const file of files) {
       const traitType = file.replace(/\.[^/.]+$/, "");
       const traitValue = await uploadFileToIPFS(`${filesDir}/${file}`);
-      traits.push({ trait_type: traitType, value: traitValue });
+      traits.push({ trait_type: traitType, value: traitValue.replace("///ipfs", "/") });
     }
 
     // Build metadata object
@@ -70,10 +70,10 @@ task("generate-metadata", "Generate metadata file and upload files to IPFS")
   });
 
 task("upload-metadata", "Upload file to IPFS using Infura")
-  .addParam("path", "Set the path of the file to upload")
+  .addParam("metadata", "Set the path of the file to upload")
   .setAction(async (args, hre) => {
     try {
-      const { stdout, stderr } = await uploadFileToIPFS(args.path);
+      const { stdout, stderr } = await uploadFileToIPFS(args.metadata);
       if (stderr) console.error(`Error: ${JSON.stringify(stderr)}`);
       if (stdout) console.log(`File uploaded to IPFS with hash: ${JSON.stringify(stdout)}`);
     } catch (error) {
