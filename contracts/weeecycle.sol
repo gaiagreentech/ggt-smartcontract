@@ -3,11 +3,12 @@ pragma solidity ^0.8.14;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 
-contract WEEECycleNFT is KeeperCompatibleInterface, ERC721, ERC721URIStorage, Ownable {
+contract WEEECycleNFT is KeeperCompatibleInterface, ERC721, ERC721URIStorage, ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter; // Counter for tracking token IDs
@@ -17,6 +18,19 @@ contract WEEECycleNFT is KeeperCompatibleInterface, ERC721, ERC721URIStorage, Ow
 
     constructor(uint256 _interval) ERC721("WEEECycleNFT", "WEEE") {
         interval = _interval;
+    }
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 firstTokenId,
+        uint256 batchSize) internal override(ERC721, ERC721Enumerable) 
+    {
+        super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
+    }
+
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721Enumerable) returns (bool) {
+        return super.supportsInterface(interfaceId);
     }
 
     // Check if any token needs upkeep
@@ -49,9 +63,7 @@ contract WEEECycleNFT is KeeperCompatibleInterface, ERC721, ERC721URIStorage, Ow
             if(tokensToBurn[i] != 0){
                 _burn(tokensToBurn[i]);
             }
-
         }
-        
     }
 
     // Mint a new token and set its creation timestamp
