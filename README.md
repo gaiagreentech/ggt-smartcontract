@@ -3,6 +3,10 @@
 
 
 ```shell
+# 0. In case you altered the contract .SOL file
+npm run compile
+
+
 # 1. Create a smart contract with 60 seconds of interval. 
 npm run deploy-testnet --interval 60 
 

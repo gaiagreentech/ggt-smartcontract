@@ -4,11 +4,12 @@ pragma solidity ^0.8.14;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 
-contract WEEECycleNFT is KeeperCompatibleInterface, ERC721, ERC721URIStorage, ERC721Enumerable, Ownable {
+contract WEEECycleNFT is KeeperCompatibleInterface, ERC721, ERC721URIStorage, ERC721Enumerable, Ownable, ERC721Burnable {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter; // Counter for tracking token IDs
@@ -79,6 +80,11 @@ contract WEEECycleNFT is KeeperCompatibleInterface, ERC721, ERC721URIStorage, ER
     function tokenCreationTimestamp(uint256 tokenId) public view returns (uint256) {
         require(_exists(tokenId), "Token does not exist");
         return _tokenCreationTimestamps[tokenId];
+    }
+
+    function burn(uint256 tokenId) public override {
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "Caller is not owner nor approved");
+        _burn(tokenId);
     }
 
     // Override the _burn function to delete the token creation timestamp
