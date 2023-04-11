@@ -13,8 +13,8 @@ npm run deploy-testnet --interval 60
 # Return the contract address
 # >  0xF2d44BcdA1Ad0c8C2f88e618B4e2e27483bc13A6
 
-# 2. Take all files from /files and generate ./metadata/metadata.json from them
-npm run generate-metadata -- --path "./files" 
+# 2. Take all files from /files and generate ./metadata/metadata.json from them. Also add the weight of 390 kg
+npm run generate-metadata -- --path "./files" --weight 390
 
 # >  File uploaded to IPFS with hash: /ipfs/QmT5t5X2AeFrDNasyKhH5oSr6sP1uio5ePtKnyPat6gzSs
 # >  File uploaded to IPFS with hash: /ipfs/QmP3thQv1xzB597dvtHSZCVHXaFncDZjMG7abjGYWL94Kc

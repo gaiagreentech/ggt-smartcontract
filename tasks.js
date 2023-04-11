@@ -43,6 +43,7 @@ task("deploy", "Deploy the contract")
 
 task("generate-metadata", "Generate metadata file and upload files to IPFS")
   .addParam("path", "Set the path of the file to upload")
+  .addParam("weight", "Set the weight of the NFT, in Kg." )
   .setAction(async (args, hre) => {
 
     // Read files from the 'files' directory and build an array of IPFS traits
@@ -54,6 +55,9 @@ task("generate-metadata", "Generate metadata file and upload files to IPFS")
       const traitValue = await uploadFileToIPFS(`${filesDir}/${file}`);
       traits.push({ trait_type: traitType, value: traitValue.replace("///ipfs", "/") });
     }
+
+    //TODO: remove hardcoded weight
+    traits.push({ trait_type: "weight", value: args.weight })
 
     // Build metadata object
     const metadata = {
