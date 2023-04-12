@@ -29,7 +29,7 @@ npm run upload-metadata -- --metadata "./metadata/metadata.json"
 # >  File uploaded to IPFS with hash: /ipfs/QmTwF4RAH1wTZbnEumURy3XbWN2vGniz87QN7Sw514gs6t
 
 # 4. Mint an NFT using the metadata. Rememeber to add it to "https://ipft.io<YOUR URL> and to add the address you want to mint to." 
-npm run mint-testnet -- --contract 0xF2d44BcdA1Ad0c8C2f88e618B4e2e27483bc13A6 --address XXXXXXXXXXXXXXXX --uri https://ipfs.io/ipfs/QmTPRK55hNGXsduqurPmg84TVBx2Bao58JRXXXQaWfTL8x
+npm run mint-testnet -- --contract 0x4FCb2F2FBd6f67AB480412e83243c642b381BD76 --address 0xe52025ECFe3E724203f755118e20C73500A6Ac6A --uri https://ipfs.io/ipfs/QmTPRK55hNGXsduqurPmg84TVBx2Bao58JRXXXQaWfTL8x
 
 
 # Return the transaction id
