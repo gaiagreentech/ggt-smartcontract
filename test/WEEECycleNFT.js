@@ -16,6 +16,7 @@ describe("WEEECycleNFT", function () {
   let ownerOf
   let getTotalSupply
   let getTokenBurnOwnershipBeforeBurn
+  let addCallerAsMinter
 
   beforeEach(async function () {
     this.WEEECycleNFT = await hre.ethers.getContractFactory("WEEECycleNFT");
@@ -40,12 +41,11 @@ describe("WEEECycleNFT", function () {
       await getBlockLog();
     };
 
-    safeMint = async (address) => {
+    safeMint = async (caller) => {
       await getBlockLog();
-      const [owner] = await hre.ethers.getSigners();
       const tx = await this.deploy
-        .connect(owner)
-        .safeMint(address, "cool");
+        .connect(caller)
+        .safeMint(caller.address, "cool");
       await tx.wait();
 
       await getBlockLog();
@@ -63,11 +63,11 @@ describe("WEEECycleNFT", function () {
       await getBlockLog();
     };
 
-    addFunds = async (address) => {
+    addFunds = async (account) => {
       await getBlockLog();
       const [owner] = await hre.ethers.getSigners();
       await owner.sendTransaction({
-        to: address,
+        to: account.address,
         value: hre.ethers.utils.parseEther("1.0"),
       });
       await getBlockLog();
@@ -76,8 +76,8 @@ describe("WEEECycleNFT", function () {
     createAddress = () =>
       hre.ethers.Wallet.createRandom().connect(this.provider);
 
-    getBalance = async (address) =>
-      (await this.deploy.balanceOf(address))["_hex"];
+    getBalance = async (account) =>
+      (await this.deploy.balanceOf(account.address))["_hex"];
 
     transfer = async (from, to) => {
       await getBlockLog();
@@ -143,16 +143,30 @@ describe("WEEECycleNFT", function () {
       return res
     }
 
+    addCallerAsMinter = async (caller) => {
+      await getBlockLog();
+      const [owner] = await hre.ethers.getSigners();
+      const tx = await this.deploy
+        .connect(owner)
+        .addMinter(caller.address, "https://example.com");
+      await tx.wait();
+      await getBlockLog();
+    };
 
     await this.deploy.deployed();
+    
   });
 
   describe("Mint", function () {
     it("Should mint a new NFT", async function () {
       const add2 = createAddress();
-      expect(await getBalance(add2.address)).to.equal("0x00");
-      await safeMint(add2.address); // Safe mint automatically mines a block
-      expect(await getBalance(add2.address)).to.equal("0x01");
+      expect(await getBalance(add2)).to.equal("0x00");
+      await addFunds(add2);
+      // Add the caller as a minter before minting
+      await addCallerAsMinter(add2);
+      await safeMint(add2); // Safe mint automatically mines a block
+
+      expect(await getBalance(add2)).to.equal("0x01");
     });
   });
 
@@ -173,22 +187,23 @@ describe("WEEECycleNFT", function () {
       const add3 = createAddress();
 
       //add funds to add2 so it have gas to transfer
-      await addFunds(add2.address);
+      await addFunds(add2);
 
 
-      expect(await getBalance(add2.address)).to.equal("0x00");
-      await safeMint(add2.address);
-      expect(await getBalance(add2.address)).to.equal("0x01");
+      expect(await getBalance(add2)).to.equal("0x00");
+      await addCallerAsMinter(add2);
+      await safeMint(add2);
+      expect(await getBalance(add2)).to.equal("0x01");
 
 
       await transfer(add2, add3);
-      expect(await getBalance(add2.address)).to.equal("0x00");
-      expect(await getBalance(add3.address)).to.equal("0x01");
+      expect(await getBalance(add2)).to.equal("0x00");
+      expect(await getBalance(add3)).to.equal("0x01");
 
       await mine(1);
       await performCycle();
-      expect(await getBalance(add2.address)).to.equal("0x00");
-      expect(await getBalance(add3.address)).to.equal("0x00");
+      expect(await getBalance(add2)).to.equal("0x00");
+      expect(await getBalance(add3)).to.equal("0x00");
     });
   });
 
@@ -196,28 +211,34 @@ describe("WEEECycleNFT", function () {
 
     it("Should burn tokens when interval time is due", async function () {
       const add2 = createAddress();
-      expect(await getBalance(add2.address)).to.equal("0x00");
-      await safeMint(add2.address); // Safe mint automatically mines a block
+      expect(await getBalance(add2)).to.equal("0x00");
+      await addFunds(add2);
+      await addCallerAsMinter(add2);
+      await safeMint(add2); // Safe mint automatically mines a block
       await performCycle();
       await performCycle();
       await performCycle();
-      expect(await getBalance(add2.address)).to.equal("0x01");
+      expect(await getBalance(add2)).to.equal("0x01");
       await mine(1);
       await performCycle();
-      expect(await getBalance(add2.address)).to.equal("0x00");
+      expect(await getBalance(add2)).to.equal("0x00");
     });
 
     it("Should only burn tokens when their time has come, no matter the block id", async function () {
       const add2 = createAddress();
-      expect(await getBalance(add2.address)).to.equal("0x00");
+      expect(await getBalance(add2)).to.equal("0x00");
+
+
 
       // Safe mint automatically mines a block
-      await safeMint(add2.address);
-      await safeMint(add2.address);
-      await safeMint(add2.address);
-      await safeMint(add2.address);
+      await addFunds(add2)
+      await addCallerAsMinter(add2);
+      await safeMint(add2);
+      await safeMint(add2);
+      await safeMint(add2);
+      await safeMint(add2);
 
-      expect(await getBalance(add2.address)).to.equal("0x04");
+      expect(await getBalance(add2)).to.equal("0x04");
       await mine(1, { interval: 1 });
       await performCycle(); // should be false
       await mine(1, { interval: 1 });
@@ -226,20 +247,20 @@ describe("WEEECycleNFT", function () {
       await performCycle(); // should be false
       await mine(1, { interval: 1 });
       await performCycle(); // should be false
-      expect(await getBalance(add2.address)).to.equal("0x04");
+      expect(await getBalance(add2)).to.equal("0x04");
       await mine(1, { interval: 26 });
       await performCycle(); // should be true, and include all the tokens
-      expect(await getBalance(add2.address)).to.equal("0x00");
+      expect(await getBalance(add2)).to.equal("0x00");
 
-      await safeMint(add2.address);
-      await safeMint(add2.address);
-      await safeMint(add2.address);
-      await safeMint(add2.address);
+      await safeMint(add2);
+      await safeMint(add2);
+      await safeMint(add2);
+      await safeMint(add2);
 
-      expect(await getBalance(add2.address)).to.equal("0x04");
+      expect(await getBalance(add2)).to.equal("0x04");
       await mine(1);
       await performCycle(); // should be true
-      expect(await getBalance(add2.address)).to.equal("0x00");
+      expect(await getBalance(add2)).to.equal("0x00");
       await mine(1);
     });
   });
@@ -248,15 +269,17 @@ describe("WEEECycleNFT", function () {
     it("Should return the burn timestamps for a specific address", async function () {
       const account = createAddress();
 
-      await addFunds(account.address);
+      await addFunds(account);
 
-      await safeMint(account.address);// tokenID = 1
+      await addCallerAsMinter(account);
+
+      await safeMint(account);// tokenID = 1
       await mine(1, { interval: 1 });
-      await safeMint(account.address); // 2
+      await safeMint(account); // 2
       await mine(1, { interval: 1 });
-      await safeMint(account.address); // 3
+      await safeMint(account); // 3
       await mine(1, { interval: 1 });
-      await safeMint(account.address); // 4
+      await safeMint(account); // 4
 
       expect(await ownerOf(1)).to.equal(account.address);
       expect(await ownerOf(2)).to.equal(account.address);

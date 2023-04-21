@@ -20,6 +20,9 @@ contract WEEECycleNFT is KeeperCompatibleInterface, ERC721, ERC721URIStorage, ER
     mapping(uint256 => uint256) private _tokenCreationTimestamps; // Mapping of token IDs to their creation timestamps
     mapping(uint256 => uint256) private _tokenBurnTimestamps;
     mapping(uint256 => address) private _tokenBurnOwnershipBeforeBurn;
+    mapping(address => string) private _minters; // Mapping of minter addresses to their document URIs
+    mapping(uint256 => address) private _tokenMinters; // Mapping of token IDs to their initial minters
+
     mapping(address => Counters.Counter ) private _tokenBurnCount;
 
     struct TokenBurnData {
@@ -42,9 +45,25 @@ contract WEEECycleNFT is KeeperCompatibleInterface, ERC721, ERC721URIStorage, ER
         super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
     }
 
+    function addMinter(address minter, string memory documentURI) public onlyOwner {
+        _minters[minter] = documentURI;
+    }
+
     function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721Enumerable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
+
+      // Check if an address is a minter
+    function isMinter(address minter) public view returns (bool) {
+        return bytes(_minters[minter]).length > 0;
+    }
+
+    // Get the document URI of a minter
+    function getMinterDocumentURI(address minter) public view returns (string memory) {
+        require(isMinter(minter), "Address is not a minter");
+        return _minters[minter];
+    }
+
 
     // Check if any token needs upkeep
     function checkUpkeep(bytes calldata /* checkData */) external view returns (bool upkeepNeeded, bytes memory performData) {
@@ -80,15 +99,24 @@ contract WEEECycleNFT is KeeperCompatibleInterface, ERC721, ERC721URIStorage, ER
         }
     }
 
-    // Mint a new token and set its creation timestamp
-    function safeMint(address to, string memory uri) public onlyOwner {
+    // Mint a new token and set its creation timestamp, only callable by minters
+    function safeMint(address to, string memory uri) public {
+        require(isMinter(msg.sender), "Caller is not a minter");
         _tokenIdCounter.increment();
         uint256 tokenId = _tokenIdCounter.current();
         ERC721._safeMint(to, tokenId);
         ERC721URIStorage._setTokenURI(tokenId, uri);
         _tokensToDelete[tokenId] = block.timestamp;
         _tokenCreationTimestamps[tokenId] = block.timestamp;
+        _tokenMinters[tokenId] = msg.sender;
     }
+    
+    // Get the initial minter of a specific token
+    function tokenMinter(uint256 tokenId) public view returns (address) {
+        require(_exists(tokenId), "Token does not exist");
+        return _tokenMinters[tokenId];
+    }
+
 
     // Get the creation timestamp of a specific token
     function tokenCreationTimestamp(uint256 tokenId) public view returns (uint256) {

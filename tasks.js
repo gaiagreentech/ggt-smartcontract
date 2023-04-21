@@ -41,6 +41,24 @@ task("deploy", "Deploy the contract")
       console.log("WEEECycleNFT deployed to:", deploy.address);
   })
 
+
+task("add-minter", "Add a new minter to the contract")
+  .addParam("contract", "Set the address of the contract")
+  .addParam("address", "Set the address of the new minter")
+  .addParam("document", "Set the document URI for the new minter")
+  .setAction(async (args, hre) => {
+    const accounts = await hre.web3.eth.getAccounts();
+    const signer = await hre.ethers.getSigner(accounts[0]);
+
+    const WEEECycleNFT = await hre.ethers.getContractAt("WEEECycleNFT", args.contract);
+
+    const tx = await WEEECycleNFT.connect(signer).addMinter(args.address, args.document);
+
+    const txEnd = await tx.wait();
+
+    console.log(`Added minter ${args.address} with document URI ${args.document} on transaction ${txEnd.transactionHash}`);
+  });
+
 task("generate-metadata", "Generate metadata file and upload files to IPFS")
   .addParam("path", "Set the path of the file to upload")
   .addParam("weight", "Set the weight of the NFT, in Kg." )
