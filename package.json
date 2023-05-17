@@ -7,6 +7,8 @@
     "test": "hardhat --network hardhat test",
     "compile": "hardhat compile",
     "deploy": "hardhat deploy",
+    "add-minter": "hardhat add-minter",
+    "deploy-marketplace-testnet": "hardhat --network mumbai deploy-marketplace",
     "deploy-testnet": "hardhat --network mumbai deploy",
     "generate-metadata": "hardhat --network mumbai generate-metadata",
     "mint-testnet": "hardhat --network mumbai mint",

@@ -41,6 +41,20 @@ task("deploy", "Deploy the contract")
       console.log("WEEECycleNFT deployed to:", deploy.address);
   })
 
+task("deploy-marketplace", "Deploy marketplace")
+   .setAction( async ( {}, hre ) => {
+      const accounts = await hre.web3.eth.getAccounts()
+
+      const WEEEMarket = await hre.ethers.getContractFactory("WEEEMarket", accounts[0]);
+
+      const deploy = await WEEEMarket.deploy();
+
+      await deploy.deployed();
+
+      console.log("WEEEMarket deployed to:", deploy.address);
+  })
+
+
 
 task("add-minter", "Add a new minter to the contract")
   .addParam("contract", "Set the address of the contract")

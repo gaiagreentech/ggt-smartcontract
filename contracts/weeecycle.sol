@@ -125,7 +125,7 @@ contract WEEECycleNFT is KeeperCompatibleInterface, ERC721, ERC721URIStorage, ER
     }
 
     function _beforeBurn(uint256 tokenId) internal virtual {
-        _tokenBurnOwnershipBeforeBurn[tokenId] = ownerOf(_tokenIdCounter.current());
+        _tokenBurnOwnershipBeforeBurn[tokenId] = ownerOf(tokenId);
         _tokenBurnTimestamps[tokenId] = block.timestamp;
         _tokenBurnCount[ownerOf(tokenId)].increment();
     }

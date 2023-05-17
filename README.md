@@ -16,7 +16,7 @@ npm run add-minter -- --contract 0xF2d44BcdA1Ad0c8C2f88e618B4e2e27483bc13A6 --ad
 # Returns nothing but success response.
 
 # 3. Take all files from /files and generate ./metadata/metadata.json from them. Also add the weight of 390 kg
-npm run generate-metadata -- --path "./files" --weight 390
+npm run generate-metadata -- --path "./files" --weight 390 --gtd 
 
 # >  File uploaded to IPFS with hash: /ipfs/QmT5t5X2AeFrDNasyKhH5oSr6sP1uio5ePtKnyPat6gzSs
 # >  File uploaded to IPFS with hash: /ipfs/QmP3thQv1xzB597dvtHSZCVHXaFncDZjMG7abjGYWL94Kc
@@ -31,7 +31,7 @@ npm run upload-metadata -- --metadata "./metadata/metadata.json"
 # >  File uploaded to IPFS with hash: /ipfs/QmTwF4RAH1wTZbnEumURy3XbWN2vGniz87QN7Sw514gs6t
 
 # 5. Mint an NFT using the metadata. Rememeber to add it to "https://ipft.io<YOUR URL> and to add the address you want to mint to." 
-npm run mint-testnet -- --contract 0x4FCb2F2FBd6f67AB480412e83243c642b381BD76 --address 0xe52025ECFe3E724203f755118e20C73500A6Ac6A --uri https://ipfs.io/ipfs/QmTPRK55hNGXsduqurPmg84TVBx2Bao58JRXXXQaWfTL8x
+npm run mint-testnet -- --contract 0x4FCb2F2FBd6f67AB480412e83243c642b381BD76 --address 0xe52025ECFe3E724203f755118e20C73500A6Ac6A --uri https://ipfs.io/ipfs/QmTPRK55hNGXsduqurPmg84TVBx2Bao58JRXXXQaWfTL8x 
 
 # Return the transaction id
 # >  Minted NFT to 0xfCEB2DaF512e5Fd2Ca7C81a9998469603F46E6F2 on transaction 0x6fc53864a3854def0b80811089a791154d2884d89b31dda7b814534bc5754e91
