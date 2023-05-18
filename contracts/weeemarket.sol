@@ -16,8 +16,7 @@ contract WEEEMarket is ReentrancyGuard {
 
     address payable private owner;
 
-    // Challenge: make this price dynamic according to the current currency price
-    uint256 private listingFee = 0.045 ether;
+    uint256 private listingFee;
 
     mapping(uint256 => MarketItem) private marketItemIdToMarketItem;
 
@@ -45,8 +44,9 @@ contract WEEEMarket is ReentrancyGuard {
         bool canceled
     );
 
-    constructor() {
+    constructor(uint256 _listingFee) {
         owner = payable(msg.sender);
+        listingFee = _listingFee;
     }
 
     function getListingFee() public view returns (uint256) {

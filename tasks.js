@@ -42,12 +42,13 @@ task("deploy", "Deploy the contract")
   })
 
 task("deploy-marketplace", "Deploy marketplace")
-   .setAction( async ( {}, hre ) => {
+   .addParam("fee", "Set the fee for the marketplace, in WEI", 2500000000 , types.int)
+   .setAction( async ( args, hre ) => {
       const accounts = await hre.web3.eth.getAccounts()
 
       const WEEEMarket = await hre.ethers.getContractFactory("WEEEMarket", accounts[0]);
 
-      const deploy = await WEEEMarket.deploy();
+      const deploy = await WEEEMarket.deploy(args.fee);
 
       await deploy.deployed();
 
